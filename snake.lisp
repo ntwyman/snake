@@ -6,7 +6,7 @@
 
 (in-package :snake)
 
-(defvar *tick* 500)
+(defvar *tick* 200)
 (defvar *scale* 10)
 
 (defstruct (segment (:conc-name sg-))
@@ -14,15 +14,15 @@
   (y 0 :type integer)
   box)
 
-(defparameter *food* (make-point))
+(defparameter *food* ())
 (defparameter *snake* ())
 (defparameter *direction* :none)
 
 (defun scale-d (d) (* d *scale*))
 
 (defun move-snake (canvas s x y)
-  (let* ((head (car s))
-         (tail (cdr s)))
+  (let* ((head (first s))
+         (tail (rest s)))
     (if (null head)
         ()
         (progn (set-coords canvas
@@ -40,17 +40,14 @@
   (let* ((head (car *snake*))
          (old-x (sg-x head))
          (old-y (sg-y head))
-         (new-x (if (eq *direction* :right)
-                    (1+ old-x)
-                    (if (eq *direction* :left)
-                        (1- old-x)
-                        old-x)))
-         (new-y (if (eq *direction* :up)
-                    (1- old-y)
-                    (if (eq *direction* :down)
-                        (1+ old-y)
-                        old-y))))
-    (print (concatenate 'string "new-x: " (write-to-string new-x) ", new-y: " (write-to-string new-y)))
+         (new-x (cond
+                  ((eq *direction* :right) (1+ old-x))
+                  ((eq *direction* :left) (1- old-x))
+                  (t old-x)))
+         (new-y (cond
+                  ((eq *direction* :down) (1+ old-y))
+                  ((eq *direction* :up) (1- old-y))
+                  (t old-y))))
     (if (or (= new-x -1)
             (= new-x 50)
             (= new-y -1)
@@ -78,12 +75,14 @@
       (make-snake canvas)
       (bind *tk* "<Key>"
             (lambda (evt)
-              (print (type-of (event-char evt)))
-              (case (event-char evt)
-                ('A (print "arrow"))
-                (otherwise (print (event-char evt))))
-              (setq *direction* :up)
-              ))
-
+              (let* ((k (symbol-name (event-char evt))))
+                ; this sucks - needs a better way
+                (setq *direction* (cond
+                                    ((equal k "UP") :up)
+                                    ((equal k "DOWN") :down)
+                                    ((equal k "LEFT") :left)
+                                    ((equal k "RIGHT") :right)
+                                    (t *direction*)
+                                    )))))
       (after *tick* (lambda () (tick canvas)))
       )))
