@@ -1,8 +1,8 @@
 (ql:quickload "ltk")
+
 (defpackage :snake
   (:use :cl :ltk)
-  (:export snake)
-  )
+  (:export snake))
 
 (in-package :snake)
 
@@ -24,8 +24,8 @@
   (y 0 :type integer)
   id)
 
-(defparameter *snake*)
-(defparameter *food*)
+(defparameter *snake* nil)
+(defparameter *food* nil)
 (defparameter *direction* :none)
 
 (defun scale-d (d)
@@ -73,7 +73,7 @@
     (move-shape canvas *food* (co-x pos) (co-y pos))))
 
 (defun tick (canvas)
-  (let* ((head (car *snake*))
+  (let* ((head (first *snake*))
          (old-x (sh-x head))
          (old-y (sh-y head))
          (new-x (cond
@@ -86,11 +86,13 @@
                   (t old-y))))
 
     ; Fell off the edge of the world
-    (if (or (= new-x -1)
-            (= new-x 50)
-            (= new-y -1)
-            (= new-y 50)
-            (snake-contains *snake* new-x new-y))
+    (if (and (or (not (= new-x old-x))
+                 (not (= new-y old-y)))
+             (or (= new-x -1)
+                 (= new-x 50)
+                 (= new-y -1)
+                 (= new-y 50)
+                 (snake-contains *snake* new-x new-y)))
         (print "BOOOM"))
 
     ; nom-nom-nom
