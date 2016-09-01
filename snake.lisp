@@ -86,14 +86,15 @@
                   (t old-y))))
 
     ; Fell off the edge of the world
-    (if (and (or (not (= new-x old-x))
+    (when (and (or (not (= new-x old-x))
                  (not (= new-y old-y)))
              (or (= new-x -1)
                  (= new-x 50)
                  (= new-y -1)
                  (= new-y 50)
                  (snake-contains *snake* new-x new-y)))
-        (print "BOOOM"))
+      (create-text canvas 210 250 "GAME OVER!")
+      (return-from tick))
 
     ; nom-nom-nom
     (if (and (= new-x (sh-x *food*))
@@ -112,7 +113,7 @@
   (with-ltk ()
     (let* ((canvas (make-instance 'canvas :width (scale-d *x-size*) :height (scale-d *y-size*))))
       (pack canvas)
-      (setq *snake* (list (rnd-shape canvas #'make-rectangle)))
+      (setq *snake* (list (rnd-shape canvas #'create-rectangle)))
       (setq *food* (rnd-shape canvas #'create-oval))
       (bind *tk* "<Key>"
             (lambda (evt)
